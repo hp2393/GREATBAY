@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
   user: "root",
 
   // Your password
-  password: "INSERT PASSWORD HERE",
+  password: "INSERT PASSWORD",
   database: "greatbay_db"
 });
 
@@ -110,17 +110,60 @@ function bidItemPrompt() {
         name: "selection"
       }
     ]).then(function(response) {
-      bidItem(response.selection);
+
+      var selectedID = 0;
+      var selectedBid = 0;
+
+      for (var i = 0; i < res.length; i++){
+        if (res[i].objectName === response.selection){
+          selectedID = res[i].id;
+          selectedBid = res[i].bid;
+        }
+      };
+
+      bidItem(selectedID, selectedBid);
     });
   });
 }
 
-function bidItem( item ) {
+function bidItem( ID, currBid ) {
   inquirer.prompt([
     {
       type: "input",
       message: "How much would you like to bid? ",
       name: "userBid"
     }
-  ])
+  ]).then(function(response){
+    connection.query("SELECT FROM greatbay WHERE ?",
+    {
+      id: ID
+    },
+    function(err, res){
+      if (currBid > response.userBid){
+        console.log("Your bid is too low!\n");
+        startPrompt();
+      }
+      else {
+        updateBid( ID, response.userBid);
+      }
+    });
+  });
+}
+
+function updateBid( ID, userBid ) {
+  var query = connection.query(
+    "UPDATE greatbay SET ? WHERE ?",
+    [
+      {
+        bid: userBid
+      },
+      {
+        id: ID
+      }
+    ],
+    function(err, res) {
+      console.log("Item number: " + ID + " items updated!\n");
+      startPrompt();
+    }
+  );
 }
