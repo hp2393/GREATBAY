@@ -74,7 +74,7 @@ function postItemPrompt() {
 }
 
 function postItem( name, category, startBid ) {
-  var query = connection.query(
+  connection.query(
     "INSERT INTO greatbay SET ?",
     {
       objectName: name,
@@ -90,9 +90,8 @@ function postItem( name, category, startBid ) {
 }
 
 function bidItemPrompt() {
-  var query = connection.query("SELECT * FROM greatbay", function(err, res) {
+  connection.query("SELECT * FROM greatbay", function(err, res) {
     if (err) throw err;
-
 
     console.log(res);
 
@@ -134,11 +133,6 @@ function bidItem( ID, currBid ) {
       name: "userBid"
     }
   ]).then(function(response){
-    connection.query("SELECT FROM greatbay WHERE ?",
-    {
-      id: ID
-    },
-    function(err, res){
       if (currBid > response.userBid){
         console.log("Your bid is too low!\n");
         startPrompt();
@@ -146,12 +140,11 @@ function bidItem( ID, currBid ) {
       else {
         updateBid( ID, response.userBid);
       }
-    });
   });
 }
 
 function updateBid( ID, userBid ) {
-  var query = connection.query(
+  connection.query(
     "UPDATE greatbay SET ? WHERE ?",
     [
       {
